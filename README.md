@@ -12,6 +12,8 @@ As a Frontend Engineer with a strong background in Angular, I built this project
 ## 🚀 Live Demo
 [View the Live Application Here][(https://lenapuletic.github.io/react-kanban/]
 
+![Application Screenshot](app-image.png)
+
 ## 🛠️ Tech Stack
 
 - **Framework:** React 19 + TypeScript (via Vite)
