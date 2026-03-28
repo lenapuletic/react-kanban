@@ -1,12 +1,16 @@
 # Modern React Kanban Board
+![React](https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-Ready-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Zustand](https://img.shields.io/badge/Zustand-State_Management-764ABC?style=for-the-badge)
+![dnd-kit](https://img.shields.io/badge/dnd--kit-Drag_&_Drop-FF4154?style=for-the-badge)
 
 A fully functional, drag-and-drop Kanban board built to showcase modern React development practices.
 
 As a Frontend Engineer with a strong background in Angular, I built this project to demonstrate my flexibility and understanding of the React ecosystem, specifically focusing on hook-based state management and unopinionated component architecture.
 
 ## 🚀 Live Demo
-
-[Link coming soon!]
+[View the Live Application Here][(https://lenapuletic.github.io/react-kanban/]
 
 ## 🛠️ Tech Stack
 
