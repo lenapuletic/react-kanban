@@ -1,10 +1,4 @@
-import {
-  type FormEvent,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
+import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 export type TextInputDialogProps = {
@@ -13,6 +7,7 @@ export type TextInputDialogProps = {
   heading: string;
   inputLabel: string;
   placeholder?: string;
+  initialValue?: string;
   submitLabel: string;
   onConfirm: (value: string) => void;
 };
@@ -23,6 +18,7 @@ export function TextInputDialog({
   heading,
   inputLabel,
   placeholder,
+  initialValue,
   submitLabel,
   onConfirm,
 }: TextInputDialogProps) {
@@ -36,10 +32,11 @@ export function TextInputDialog({
   useEffect(() => {
     if (!open) return;
 
-    setValue("");
+    setValue(initialValue ?? "");
     setError(null);
     const frame = requestAnimationFrame(() => {
       inputRef.current?.focus();
+      inputRef.current?.select();
     });
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -53,7 +50,7 @@ export function TextInputDialog({
       cancelAnimationFrame(frame);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, onOpenChange]);
+  }, [open, initialValue, onOpenChange]);
 
   if (!open) return null;
 
@@ -107,7 +104,11 @@ export function TextInputDialog({
               className="w-full rounded-lg border border-neutral-600 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none ring-blue-500 focus:ring-2"
             />
             {error ? (
-              <p id={errorId} className="mt-1 text-sm text-red-400" role="alert">
+              <p
+                id={errorId}
+                className="mt-1 text-sm text-red-400"
+                role="alert"
+              >
                 {error}
               </p>
             ) : null}

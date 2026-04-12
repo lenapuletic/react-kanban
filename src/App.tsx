@@ -14,7 +14,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import type { Task } from "./types";
-import { TaskCard } from "./components/TaskCard";
+import { TaskCardPreview } from "./components/TaskCard";
 import { TextInputDialog } from "./components/TextInputDialog";
 
 function App() {
@@ -144,7 +144,7 @@ function App() {
           </div>
 
           <DragOverlay>
-            {activeTask ? <TaskCard task={activeTask} /> : null}
+            {activeTask ? <TaskCardPreview task={activeTask} /> : null}
           </DragOverlay>
         </DndContext>
       </div>

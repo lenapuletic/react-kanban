@@ -1,3 +1,4 @@
+import { arrayMove } from "@dnd-kit/sortable";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Column, Task, Id } from "../types";
@@ -9,6 +10,8 @@ interface BoardState {
   // Actions
   addColumn: (title: string) => void;
   deleteColumn: (id: Id) => void;
+  renameColumn: (id: Id, title: string) => void;
+  moveColumn: (id: Id, direction: -1 | 1) => void;
   addTask: (columnId: Id, content: string) => void;
   deleteTask: (id: Id) => void;
   updateTask: (id: Id, content: string) => void;
@@ -36,6 +39,29 @@ export const useBoardStore = create<BoardState>()(
           columns: state.columns.filter((col) => col.id !== id),
           tasks: state.tasks.filter((task) => task.columnId !== id),
         })),
+
+      renameColumn: (id, title) =>
+        set((state) => ({
+          columns: state.columns.map((col) =>
+            col.id === id ? { ...col, title } : col,
+          ),
+        })),
+
+      moveColumn: (id, direction) =>
+        set((state) => {
+          const index = state.columns.findIndex((col) => col.id === id);
+          const nextIndex = index + direction;
+          if (
+            index < 0 ||
+            nextIndex < 0 ||
+            nextIndex >= state.columns.length
+          ) {
+            return state;
+          }
+          return {
+            columns: arrayMove(state.columns, index, nextIndex),
+          };
+        }),
 
       addTask: (columnId, content) =>
         set((state) => ({
