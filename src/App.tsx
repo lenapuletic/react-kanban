@@ -15,12 +15,14 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import type { Task } from "./types";
 import { TaskCard } from "./components/TaskCard";
+import { TextInputDialog } from "./components/TextInputDialog";
 
 function App() {
   const { columns, tasks, addColumn, setTasks } = useBoardStore();
 
   // State to track exactly which task is currently flying around the screen
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [columnDialogOpen, setColumnDialogOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -29,12 +31,6 @@ function App() {
       },
     }),
   );
-
-  const handleAddColumn = () => {
-    const title = window.prompt("Enter column title:");
-    if (!title) return;
-    addColumn(title);
-  };
 
   // Fires the moment you click and drag a task
   const onDragStart = (event: DragStartEvent) => {
@@ -138,7 +134,8 @@ function App() {
             </div>
 
             <button
-              onClick={handleAddColumn}
+              type="button"
+              onClick={() => setColumnDialogOpen(true)}
               className="h-[60px] w-[350px] min-w-[350px] cursor-pointer rounded-lg bg-neutral-900 border-2 border-neutral-700 p-4 ring-blue-500 hover:ring-2 flex gap-2 items-center transition-all shadow-sm"
             >
               <Plus size={24} />
@@ -151,6 +148,16 @@ function App() {
           </DragOverlay>
         </DndContext>
       </div>
+
+      <TextInputDialog
+        open={columnDialogOpen}
+        onOpenChange={setColumnDialogOpen}
+        heading="Add column"
+        inputLabel="Column title"
+        placeholder="e.g. In progress"
+        submitLabel="Add column"
+        onConfirm={(title) => addColumn(title)}
+      />
     </div>
   );
 }

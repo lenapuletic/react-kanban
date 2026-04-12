@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import type { Column, Task } from "../types";
 import { TaskCard } from "./TaskCard";
+import { TextInputDialog } from "./TextInputDialog";
 import { useBoardStore } from "../store/boardStore";
 import { SortableContext } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
@@ -12,6 +14,7 @@ interface Props {
 
 export function ColumnContainer({ column, tasks }: Props) {
   const { deleteColumn, addTask } = useBoardStore();
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
 
   // Register the column as a valid drop zone
   const { setNodeRef } = useDroppable({
@@ -21,12 +24,6 @@ export function ColumnContainer({ column, tasks }: Props) {
       column,
     },
   });
-
-  const handleAddTask = () => {
-    const content = window.prompt("Enter task content:");
-    if (!content) return;
-    addTask(column.id, content);
-  };
 
   // Extract just the IDs for the SortableContext
   const taskIds = tasks.map((task) => task.id);
@@ -63,12 +60,23 @@ export function ColumnContainer({ column, tasks }: Props) {
 
       {/* Footer */}
       <button
-        onClick={handleAddTask}
+        type="button"
+        onClick={() => setTaskDialogOpen(true)}
         className="flex gap-2 items-center border-neutral-700 border-2 rounded-md p-4 border-x-neutral-700 hover:bg-neutral-800 hover:text-blue-500 active:bg-black m-2 transition-colors"
       >
         <Plus size={20} />
         Add Task
       </button>
+
+      <TextInputDialog
+        open={taskDialogOpen}
+        onOpenChange={setTaskDialogOpen}
+        heading="Add task"
+        inputLabel="Task description"
+        placeholder="What needs to be done?"
+        submitLabel="Add task"
+        onConfirm={(content) => addTask(column.id, content)}
+      />
     </div>
   );
 }
