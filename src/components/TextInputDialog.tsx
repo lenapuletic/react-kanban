@@ -12,8 +12,9 @@ export type TextInputDialogProps = {
   onConfirm: (value: string) => void;
 };
 
-export function TextInputDialog({
-  open,
+type PanelProps = Omit<TextInputDialogProps, "open">;
+
+function TextInputDialogPanel({
   onOpenChange,
   heading,
   inputLabel,
@@ -21,8 +22,8 @@ export function TextInputDialog({
   initialValue,
   submitLabel,
   onConfirm,
-}: TextInputDialogProps) {
-  const [value, setValue] = useState("");
+}: PanelProps) {
+  const [value, setValue] = useState(() => initialValue ?? "");
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const headingId = useId();
@@ -30,10 +31,6 @@ export function TextInputDialog({
   const errorId = useId();
 
   useEffect(() => {
-    if (!open) return;
-
-    setValue(initialValue ?? "");
-    setError(null);
     const frame = requestAnimationFrame(() => {
       inputRef.current?.focus();
       inputRef.current?.select();
@@ -50,9 +47,7 @@ export function TextInputDialog({
       cancelAnimationFrame(frame);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, initialValue, onOpenChange]);
-
-  if (!open) return null;
+  }, [onOpenChange]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -65,7 +60,7 @@ export function TextInputDialog({
     onOpenChange(false);
   };
 
-  const dialog = (
+  return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/60"
@@ -132,6 +127,9 @@ export function TextInputDialog({
       </div>
     </div>
   );
+}
 
-  return createPortal(dialog, document.body);
+export function TextInputDialog({ open, ...rest }: TextInputDialogProps) {
+  if (!open) return null;
+  return createPortal(<TextInputDialogPanel {...rest} />, document.body);
 }

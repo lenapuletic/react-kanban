@@ -1,6 +1,7 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { withSyncedSortOrders } from "../lib/taskSortOrder";
 import type { Column, Task, Id } from "../types";
 
 interface BoardState {
@@ -19,7 +20,32 @@ interface BoardState {
   setTasks: (tasks: Task[]) => void;
 }
 
-const generateId = () => Math.floor(Math.random() * 10000001);
+function generateId(): string {
+  return crypto.randomUUID();
+}
+
+const STORAGE_VERSION = 2;
+
+type PersistedSlice = Pick<BoardState, "columns" | "tasks">;
+
+function normalizePersistedSlice(
+  slice: Partial<PersistedSlice> | undefined,
+): PersistedSlice {
+  const columns = slice?.columns ?? [];
+  const rawTasks = (slice?.tasks ?? []) as Task[];
+  return {
+    columns,
+    tasks: withSyncedSortOrders(rawTasks.map((t) => ({ ...t }))),
+  };
+}
+
+function migratePersisted(
+  oldState: unknown,
+  _fromVersion: number,
+): PersistedSlice {
+  void _fromVersion;
+  return normalizePersistedSlice(oldState as Partial<PersistedSlice>);
+}
 
 export const useBoardStore = create<BoardState>()(
   persist(
@@ -51,11 +77,7 @@ export const useBoardStore = create<BoardState>()(
         set((state) => {
           const index = state.columns.findIndex((col) => col.id === id);
           const nextIndex = index + direction;
-          if (
-            index < 0 ||
-            nextIndex < 0 ||
-            nextIndex >= state.columns.length
-          ) {
+          if (index < 0 || nextIndex < 0 || nextIndex >= state.columns.length) {
             return state;
           }
           return {
@@ -65,13 +87,22 @@ export const useBoardStore = create<BoardState>()(
 
       addTask: (columnId, content) =>
         set((state) => ({
-          tasks: [...state.tasks, { id: generateId(), columnId, content }],
+          tasks: withSyncedSortOrders([
+            ...state.tasks,
+            {
+              id: generateId(),
+              columnId,
+              content,
+              sortOrder: 0,
+            },
+          ]),
         })),
 
       deleteTask: (id) =>
-        set((state) => ({
-          tasks: state.tasks.filter((task) => task.id !== id),
-        })),
+        set((state) => {
+          const next = state.tasks.filter((task) => task.id !== id);
+          return { tasks: withSyncedSortOrders(next) };
+        }),
 
       updateTask: (id, content) =>
         set((state) => ({
@@ -81,10 +112,20 @@ export const useBoardStore = create<BoardState>()(
         })),
 
       setColumns: (columns) => set({ columns }),
-      setTasks: (tasks) => set({ tasks }),
+      setTasks: (tasks) => set({ tasks: withSyncedSortOrders(tasks) }),
     }),
     {
-      name: "kanban-storage", // The key used in localStorage
+      name: "kanban-storage",
+      version: STORAGE_VERSION,
+      migrate: migratePersisted,
+      merge: (persistedState, currentState) => {
+        const p = persistedState as Partial<PersistedSlice> | undefined;
+        const normalized = normalizePersistedSlice(p);
+        return {
+          ...currentState,
+          ...normalized,
+        };
+      },
     },
   ),
 );

@@ -13,6 +13,7 @@ import {
   DragOverlay,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
+import { sortTasksForColumn } from "./lib/taskSortOrder";
 import type { Task } from "./types";
 import { TaskCardPreview } from "./components/TaskCard";
 import { TextInputDialog } from "./components/TextInputDialog";
@@ -84,7 +85,7 @@ function App() {
       const overIndex = tasks.findIndex((t) => t.id === overId);
 
       if (tasks[activeIndex].columnId !== tasks[overIndex].columnId) {
-        let newTasks = [...tasks];
+        const newTasks = [...tasks];
         newTasks[activeIndex].columnId = tasks[overIndex].columnId;
         setTasks(arrayMove(newTasks, activeIndex, overIndex));
       }
@@ -120,9 +121,7 @@ function App() {
           <div className="m-auto flex gap-4 h-full items-center">
             <div className="flex gap-4">
               {columns.map((col) => {
-                const columnTasks = tasks.filter(
-                  (task) => task.columnId === col.id,
-                );
+                const columnTasks = sortTasksForColumn(tasks, col.id);
                 return (
                   <ColumnContainer
                     key={col.id}
