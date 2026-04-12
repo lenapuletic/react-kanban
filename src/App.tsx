@@ -108,6 +108,7 @@ function App() {
         (t) => String(t.id) === String(activeId),
       );
       const overIndex = tasks.findIndex((t) => String(t.id) === String(overId));
+      if (activeIndex === -1 || overIndex === -1) return;
 
       if (
         String(tasks[activeIndex].columnId) !==
@@ -124,6 +125,8 @@ function App() {
       const activeIndex = tasks.findIndex(
         (t) => String(t.id) === String(activeId),
       );
+      if (activeIndex === -1) return;
+
       const newTasks = [...tasks];
       newTasks[activeIndex].columnId = String(overId);
       setTasks(arrayMove(newTasks, activeIndex, activeIndex));
