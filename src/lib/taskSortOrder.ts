@@ -10,12 +10,18 @@ export function withSyncedSortOrders(tasks: Task[]): Task[] {
     const key = String(task.columnId);
     const order = nextByColumn.get(key) ?? 0;
     nextByColumn.set(key, order + 1);
-    return { ...task, sortOrder: order };
+    return {
+      ...task,
+      id: String(task.id),
+      columnId: key,
+      sortOrder: order,
+    };
   });
 }
 
 export function sortTasksForColumn(tasks: Task[], columnId: Id): Task[] {
+  const col = String(columnId);
   return tasks
-    .filter((t) => t.columnId === columnId)
+    .filter((t) => String(t.columnId) === col)
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }

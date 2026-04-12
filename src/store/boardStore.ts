@@ -31,7 +31,10 @@ type PersistedSlice = Pick<BoardState, "columns" | "tasks">;
 function normalizePersistedSlice(
   slice: Partial<PersistedSlice> | undefined,
 ): PersistedSlice {
-  const columns = slice?.columns ?? [];
+  const columns = (slice?.columns ?? []).map((c) => ({
+    ...c,
+    id: String(c.id),
+  }));
   const rawTasks = (slice?.tasks ?? []) as Task[];
   return {
     columns,
@@ -61,21 +64,26 @@ export const useBoardStore = create<BoardState>()(
         })),
 
       deleteColumn: (id) =>
-        set((state) => ({
-          columns: state.columns.filter((col) => col.id !== id),
-          tasks: state.tasks.filter((task) => task.columnId !== id),
-        })),
+        set((state) => {
+          const sid = String(id);
+          return {
+            columns: state.columns.filter((col) => String(col.id) !== sid),
+            tasks: state.tasks.filter((task) => String(task.columnId) !== sid),
+          };
+        }),
 
       renameColumn: (id, title) =>
         set((state) => ({
           columns: state.columns.map((col) =>
-            col.id === id ? { ...col, title } : col,
+            String(col.id) === String(id) ? { ...col, title } : col,
           ),
         })),
 
       moveColumn: (id, direction) =>
         set((state) => {
-          const index = state.columns.findIndex((col) => col.id === id);
+          const index = state.columns.findIndex(
+            (col) => String(col.id) === String(id),
+          );
           const nextIndex = index + direction;
           if (index < 0 || nextIndex < 0 || nextIndex >= state.columns.length) {
             return state;
@@ -100,14 +108,15 @@ export const useBoardStore = create<BoardState>()(
 
       deleteTask: (id) =>
         set((state) => {
-          const next = state.tasks.filter((task) => task.id !== id);
+          const sid = String(id);
+          const next = state.tasks.filter((task) => String(task.id) !== sid);
           return { tasks: withSyncedSortOrders(next) };
         }),
 
       updateTask: (id, content) =>
         set((state) => ({
           tasks: state.tasks.map((task) =>
-            task.id === id ? { ...task, content } : task,
+            String(task.id) === String(id) ? { ...task, content } : task,
           ),
         })),
 

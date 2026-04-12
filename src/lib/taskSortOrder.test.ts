@@ -4,6 +4,20 @@ import type { Task } from "../types";
 import { sortTasksForColumn, withSyncedSortOrders } from "./taskSortOrder";
 
 describe("withSyncedSortOrders", () => {
+  it("normalizes id and columnId to strings (legacy numeric persistence)", () => {
+    const tasks = [
+      {
+        id: 9001,
+        columnId: 42,
+        content: "legacy",
+        sortOrder: 0,
+      },
+    ] as Task[];
+    const synced = withSyncedSortOrders(tasks);
+    expect(synced[0].id).toBe("9001");
+    expect(synced[0].columnId).toBe("42");
+  });
+
   it("assigns contiguous sortOrder per column from flat array order", () => {
     const colA = "col-a";
     const colB = "col-b";
@@ -29,6 +43,15 @@ describe("sortTasksForColumn", () => {
     ];
     const sorted = sortTasksForColumn(tasks, col);
     expect(sorted.map((t) => t.id)).toEqual(["y", "x"]);
+  });
+
+  it("matches column id when task uses number and query uses string (or reverse)", () => {
+    const tasks: Task[] = [
+      { id: "a", columnId: 10, content: "n", sortOrder: 0 },
+      { id: "b", columnId: "10", content: "s", sortOrder: 1 },
+    ];
+    expect(sortTasksForColumn(tasks, 10).map((t) => t.id)).toEqual(["a", "b"]);
+    expect(sortTasksForColumn(tasks, "10").map((t) => t.id)).toEqual(["a", "b"]);
   });
 });
 

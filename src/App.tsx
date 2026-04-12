@@ -57,8 +57,8 @@ function App() {
     const isOverTask = over.data.current?.type === "Task";
 
     if (isActiveTask && isOverTask) {
-      const activeIndex = tasks.findIndex((t) => t.id === activeId);
-      const overIndex = tasks.findIndex((t) => t.id === overId);
+      const activeIndex = tasks.findIndex((t) => String(t.id) === String(activeId));
+      const overIndex = tasks.findIndex((t) => String(t.id) === String(overId));
       setTasks(arrayMove(tasks, activeIndex, overIndex));
     }
   };
@@ -81,21 +81,24 @@ function App() {
 
     // Moving a task over another task in a different column
     if (isActiveTask && isOverTask) {
-      const activeIndex = tasks.findIndex((t) => t.id === activeId);
-      const overIndex = tasks.findIndex((t) => t.id === overId);
+      const activeIndex = tasks.findIndex((t) => String(t.id) === String(activeId));
+      const overIndex = tasks.findIndex((t) => String(t.id) === String(overId));
 
-      if (tasks[activeIndex].columnId !== tasks[overIndex].columnId) {
+      if (
+        String(tasks[activeIndex].columnId) !==
+        String(tasks[overIndex].columnId)
+      ) {
         const newTasks = [...tasks];
-        newTasks[activeIndex].columnId = tasks[overIndex].columnId;
+        newTasks[activeIndex].columnId = String(tasks[overIndex].columnId);
         setTasks(arrayMove(newTasks, activeIndex, overIndex));
       }
     }
 
     // Dropping a task into an entirely empty column
     if (isActiveTask && isOverColumn) {
-      const activeIndex = tasks.findIndex((t) => t.id === activeId);
+      const activeIndex = tasks.findIndex((t) => String(t.id) === String(activeId));
       const newTasks = [...tasks];
-      newTasks[activeIndex].columnId = overId;
+      newTasks[activeIndex].columnId = String(overId);
       setTasks(arrayMove(newTasks, activeIndex, activeIndex));
     }
   };
