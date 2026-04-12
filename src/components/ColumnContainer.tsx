@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Column, Task } from "../types";
 import { TaskCard } from "./TaskCard";
 import { TextInputDialog } from "./TextInputDialog";
