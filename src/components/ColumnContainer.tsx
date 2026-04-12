@@ -21,7 +21,9 @@ export function ColumnContainer({ column, tasks }: Props) {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
 
-  const columnIndex = columns.findIndex((c) => c.id === column.id);
+  const columnIndex = columns.findIndex(
+    (c) => String(c.id) === String(column.id),
+  );
   const canMoveLeft = columnIndex > 0;
   const canMoveRight = columnIndex >= 0 && columnIndex < columns.length - 1;
 

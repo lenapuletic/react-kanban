@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { ColumnContainer } from "./components/ColumnContainer";
 import { useBoardStore } from "./store/boardStore";
@@ -24,6 +24,7 @@ function App() {
   // State to track exactly which task is currently flying around the screen
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [columnDialogOpen, setColumnDialogOpen] = useState(false);
+  const dragSourceColumnIdRef = useRef<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -36,13 +37,23 @@ function App() {
   // Fires the moment you click and drag a task
   const onDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.type === "Task") {
-      setActiveTask(event.active.data.current.task);
+      const task = event.active.data.current.task as Task;
+      setActiveTask(task);
+      dragSourceColumnIdRef.current = String(task.columnId);
     }
+  };
+
+  const onDragCancel = () => {
+    setActiveTask(null);
+    dragSourceColumnIdRef.current = null;
   };
 
   // Fires when you drop the task
   const onDragEnd = (event: DragEndEvent) => {
     setActiveTask(null); // Clear the floating task
+
+    const sourceCol = dragSourceColumnIdRef.current;
+    dragSourceColumnIdRef.current = null;
 
     const { active, over } = event;
     if (!over) return;
@@ -52,14 +63,26 @@ function App() {
 
     if (activeId === overId) return;
 
-    // This handles reordering tasks within the SAME column when you let go
+    // Same-column reorder only: cross-column moves are committed in onDragOver.
     const isActiveTask = active.data.current?.type === "Task";
     const isOverTask = over.data.current?.type === "Task";
 
-    if (isActiveTask && isOverTask) {
-      const activeIndex = tasks.findIndex((t) => String(t.id) === String(activeId));
+    if (isActiveTask && isOverTask && sourceCol != null) {
+      const activeIndex = tasks.findIndex(
+        (t) => String(t.id) === String(activeId),
+      );
       const overIndex = tasks.findIndex((t) => String(t.id) === String(overId));
-      setTasks(arrayMove(tasks, activeIndex, overIndex));
+      if (activeIndex === -1 || overIndex === -1) return;
+
+      const activeRow = tasks[activeIndex];
+      const overRow = tasks[overIndex];
+      const stillInSourceColumn = String(activeRow.columnId) === sourceCol;
+      const sameColumn =
+        String(activeRow.columnId) === String(overRow.columnId);
+
+      if (sameColumn && stillInSourceColumn) {
+        setTasks(arrayMove(tasks, activeIndex, overIndex));
+      }
     }
   };
 
@@ -81,7 +104,9 @@ function App() {
 
     // Moving a task over another task in a different column
     if (isActiveTask && isOverTask) {
-      const activeIndex = tasks.findIndex((t) => String(t.id) === String(activeId));
+      const activeIndex = tasks.findIndex(
+        (t) => String(t.id) === String(activeId),
+      );
       const overIndex = tasks.findIndex((t) => String(t.id) === String(overId));
 
       if (
@@ -96,7 +121,9 @@ function App() {
 
     // Dropping a task into an entirely empty column
     if (isActiveTask && isOverColumn) {
-      const activeIndex = tasks.findIndex((t) => String(t.id) === String(activeId));
+      const activeIndex = tasks.findIndex(
+        (t) => String(t.id) === String(activeId),
+      );
       const newTasks = [...tasks];
       newTasks[activeIndex].columnId = String(overId);
       setTasks(arrayMove(newTasks, activeIndex, activeIndex));
@@ -120,6 +147,7 @@ function App() {
           onDragStart={onDragStart}
           onDragOver={onDragOver}
           onDragEnd={onDragEnd}
+          onDragCancel={onDragCancel}
         >
           <div className="m-auto flex gap-4 h-full items-center">
             <div className="flex gap-4">
