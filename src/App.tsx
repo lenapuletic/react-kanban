@@ -115,7 +115,10 @@ function App() {
         String(tasks[overIndex].columnId)
       ) {
         const newTasks = [...tasks];
-        newTasks[activeIndex].columnId = String(tasks[overIndex].columnId);
+        newTasks[activeIndex] = {
+          ...newTasks[activeIndex],
+          columnId: String(tasks[overIndex].columnId),
+        };
         setTasks(arrayMove(newTasks, activeIndex, overIndex));
       }
     }
@@ -128,7 +131,10 @@ function App() {
       if (activeIndex === -1) return;
 
       const newTasks = [...tasks];
-      newTasks[activeIndex].columnId = String(overId);
+      newTasks[activeIndex] = {
+        ...newTasks[activeIndex],
+        columnId: String(overId),
+      };
       setTasks(arrayMove(newTasks, activeIndex, activeIndex));
     }
   };
