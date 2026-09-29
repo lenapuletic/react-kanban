@@ -9,9 +9,6 @@ A fully functional, drag-and-drop Kanban board built to showcase modern React de
 
 As a Frontend Engineer with a strong background in Angular, I built this project to demonstrate my flexibility and understanding of the React ecosystem, specifically focusing on React composition, Zustand for shared state, and an unopinionated component architecture.
 
-## 🚀 Live Demo
-[View the Live Application Here](https://lenapuletic.github.io/react-kanban/)
-
 ![Application Screenshot](app-image.png)
 
 ## 🛠️ Tech Stack
